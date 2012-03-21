@@ -1,0 +1,5 @@
+Extensions to MKL library:
+
+- Cholesky updates (import of LINPACK featres)
+- ARPACK and PROPACK
+- utils
