@@ -26,12 +26,13 @@ tic; Ltm = cholupdate(L, x, '-'); t2 = toc;
 fprintf('error %g,\trelative error %g,\telapsed time %g seconds.\n',...
 norm(At - Ltm' * Ltm, 'fro'), norm(At - Ltm' * Ltm, 'fro') / norm(At, 'fro'), t2);
 
-fprintf('Call dcud up:\n'); 
+fprintf('Call dchdd up:\n'); 
 tic; [Ltu, info] = dchdd(L, 1, x); t2 = toc;
 fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
 norm(At - Ltu' * Ltu, 'fro'), norm(At - Ltu' * Ltu, 'fro') / norm(At, 'fro'), t2, info);
 
-fprintf('Call dcud lo:\n'); 
-tic; [Ltl, info] = dchdd(L', 0, x); t2 = toc;
+fprintf('Call dchdd lo:\n'); 
+Ltran = L';
+tic; [Ltl, info] = dchdd(Ltran, 0, x); t2 = toc;
 fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
 norm(At - Ltl * Ltl', 'fro'), norm(At - Ltl * Ltl', 'fro') / norm(At, 'fro'), t2, info);
