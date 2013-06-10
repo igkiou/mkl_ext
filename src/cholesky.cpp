@@ -19,7 +19,7 @@ void dchud_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
 	double* svec = &work[2 * N];
 	const BlasInt ione = 1;
 	const BlasInt step = (*uplo == 'L') ? 1 : N;
-	BlasInt size = N;
+	BlasInt size = 0;
 	double* tbuff = NULL;
 	*info = 0;
 	for (BlasInt iter = 0; iter < N - 1; ++iter) {
@@ -40,7 +40,8 @@ void dchud_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
 			*info = 1;
 			break;
 		}
-		if (--size > 0) {
+		size = N - 1 - iter;
+		if (size > 0) {
 			drot(&size, &tbuff[step], &step, &wvec[iter + 1], &ione,
 				&cvec[iter], &svec[iter]);
 		}
@@ -76,13 +77,13 @@ void dchdd_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
 	double* cvec = &work[N];
 	double* svec = &work[2 * N];
 
-	const char trans[2] = {(*uplo == 'L') ? 'N' : 'T', 0};
+	const char trans = (*uplo == 'L') ? 'N' : 'T';
 	const char diag = 'N';
-	dtrsv(uplo, trans, &diag, n, a, n, wvec, &ione);
+	dtrsv(uplo, &trans, &diag, n, a, n, wvec, &ione);
 
 	*info = 0;
 	double qs = dnrm2(n, wvec, &ione);
-	qs = 0.0, 1.0 - qs * qs;
+	qs = 1.0 - qs * qs;
 	if (qs <= 0.0) {
 		*info = 1;
 	} else {
@@ -96,34 +97,28 @@ void dchdd_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
 			}
 		}
 		const BlasInt step = (*uplo == 'L') ? 1 : N;
-		BlasInt size = N;
-		BlasInt npos;
-		BlasInt* flind = NULL;
+		BlasInt size = 0;
 		double* tbuff = NULL;
 		memset((void*) wvec, 0, N * sizeof(wvec));
 		for (BlasInt iter = N - 1; iter >= 0; --iter) {
 			tbuff = &a[iter * (N + 1)];
-			--size;
+			/*
+			 * TODO: Change these to EPS equalities.
+			 */
 			if (*tbuff <= 0.0) {
 				*info = 1;
 				break;
 			}
-			drot(&size, &wvec[iter], &ione, tbuff, &step, &cvec[iter], &svec[iter]);
+			size = N - iter;
+			drot(&size, &wvec[iter], &ione, tbuff, &step, &cvec[iter],
+				&svec[iter]);
 			if (*tbuff < 0.0) {
-				if (flind == NULL) {
-					flind = (BlasInt*) malloc(N * sizeof(BlasInt));
-					npos = N;
-				}
-				flind[--npos] = iter;
 				qs = -1.0;
 				dscal(&size, &qs, tbuff, &step);
 			} else if (*tbuff == 0.0) {
 				*info = 1;
 				break;
 			}
-		}
-		if (flind != NULL) {
-			free((void*) flind);
 		}
 	}
 }
@@ -134,99 +129,6 @@ void dchdd(char* uplo, BlasInt* n, double* x, BlasInt* incx, double* a,
 	dcopy(n, x, incx, work, &ione);
 	dchdd_sub(uplo, n, a, work, info);
 }
-
-//void dchdd(char* uplo, BlasInt* pN, double* a, double* work, BlasInt* info) {
-//
-//	BlasInt N = *pN;
-//	double* cvec = work;
-//	double* svec = &work[N];
-//	double* wvec = &work[2 * N];
-//	BlasInt incx = 1;
-//	BlasInt retcode = 0;
-//	char trans = (*uplo == 'L') ? 'N' : 'T';
-//	char diag = 'N';
-//	dtrsv(uplo, &trans, &diag, &N, a, &N, wvec, &incx);
-//	double temp = dnrm2(&N, wvec, &incx);
-//	double qs = (1.0 - temp) * (1.0 + temp);
-//	int* flind = NULL;
-//	BlasInt npos;
-//	if (qs <= 0) {
-//		retcode = 1;
-//	} else {
-//		qs = sqrt(qs);
-//		for (BlasInt iter = N - 1; iter >= 0; --iter) {
-//			drotg(&qs, &wvec[iter], &cvec[iter], &svec[iter]);
-//			if (qs < 0) {
-//				qs = - qs;
-//				cvec[iter] = - cvec[iter];
-//				svec[iter] = - svec[iter];
-//			}
-//		}
-
-
-//	    fillVec(wkvec,n,0.0);
-//	    stp=islower?1:lmat.stride;
-//	    for (i=n-1,sz=0,tbuff=lmat.buff+((n-1)*(lmat.stride+1)); i>=0; i--) {
-//	      /* BAD: Slower for upper triangular! */
-//	      sz++;
-//	      if (*tbuff<=0.0) {
-//		retcode=1; break;
-//	      }
-//	      BLASFUNC(drot) (&sz,wkvec+i,&ione,tbuff,&stp,cvec+i,svec+i);
-//	      /* Do not want negative elements on diagonal */
-//	      if (*tbuff<0.0) {
-//		if (flind==0) {
-//		  /* Does this ever happen?
-//		     Allocate 'flind'. Size n, to make sure. Grows from the right */
-//		  flind=(int*) mxMalloc(n*sizeof(int));
-//		  npos=n;
-//		}
-//		flind[--npos]=i;
-//		qs=-1.0;
-//		BLASFUNC(dscal) (&sz,&qs,tbuff,&stp);
-//	      } else if (*tbuff==0.0) {
-//		retcode=1; break;
-//	      }
-//	      tbuff-=(lmat.stride+1);
-//	    }
-	    /* NOTE: Should have v in 'wkvec' now */
-
-//		if (*uplo == 'U') {
-//
-//		}
-//		memset(wvec, 0, N * sizeof(wvec));
-//		BlasInt step = (*uplo == 'L') ? 1 : N;
-//		double *tbuff = &a[(N - 1) * (N + 1)];
-//		BlasInt size = 0;
-//		for (BlasInt iter = N - 1; iter >= 0; --iter) {
-//			tbuff = &a[iter * (N + 1)];
-//			if (*tbuff <= 0) {
-//				retcode = 1;
-//				break;
-//			}
-//			++size;
-//			drot(&size, &wvec[iter], &incx, tbuff, &step, &cvec[iter], &svec[iter]);
-//			if (*tbuff < 0) {
-//				if (flind == NULL) {
-//					flind = (int *) malloc(N * sizeof(int));
-//					npos = N;
-//				}
-//				flind[--npos] = iter;
-//				qs = - 1.0;
-//				dscal(&size, &qs, tbuff, &step);
-//			} else
-//			if (*tbuff == 0) {
-//				retcode = 1;
-//				break;
-//			}
-//			tbuff -= (N + 1);
-//		}
-//	}
-//	if (flind != NULL) {
-//		free(flind);
-//	}
-//	*info = retcode;
-//}
 
 //void dchr(char* uplo, BlasInt* N, double* alpha, double* x, BlasInt* incx, \
 //		double* a, BlasInt* lda, double* work, BlasInt* lwork, BlasInt* info) {

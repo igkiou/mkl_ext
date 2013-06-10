@@ -28,21 +28,21 @@ all: tests
 #	ln -sf  $@.1 $@
 
 tests: \
-	$(MEXDIR)/test_dchud.$(MEXEXT) \
-	$(MEXDIR)/test_dchdd.$(MEXEXT)
+	$(MEXDIR)/dchud.$(MEXEXT) \
+	$(MEXDIR)/dchdd.$(MEXEXT)
 
 # test mex executable 
-$(MEXDIR)/test_dchud.$(MEXEXT): $(MEXDIR)/test_dchud.o $(SRCDIR)/cholesky.o
+$(MEXDIR)/dchud.$(MEXEXT): $(MEXDIR)/dchud.o $(SRCDIR)/cholesky.o
 	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
 	
-$(MEXDIR)/test_dchdd.$(MEXEXT): $(MEXDIR)/test_dchdd.o $(SRCDIR)/cholesky.o
+$(MEXDIR)/dchdd.$(MEXEXT): $(MEXDIR)/dchdd.o $(SRCDIR)/cholesky.o
 	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
 
 # mex object files
-$(MEXDIR)/test_dchud.o: $(MEXDIR)/test_dchud.cpp $(INCLUDEDIR)/blas_ext.h
+$(MEXDIR)/dchud.o: $(MEXDIR)/dchud.cpp $(INCLUDEDIR)/blas_ext.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 	
-$(MEXDIR)/test_dchdd.o: $(MEXDIR)/test_dchdd.cpp $(INCLUDEDIR)/blas_ext.h
+$(MEXDIR)/dchdd.o: $(MEXDIR)/dchdd.cpp $(INCLUDEDIR)/blas_ext.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 	
 # src object files

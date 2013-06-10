@@ -1,5 +1,5 @@
 % load test_dchud
-N = 10000;
+N = 10;
 F = randn(N, N);
 A = F' * F / N;
 x = randn(N, 1);
@@ -25,11 +25,11 @@ fprintf('error %g,\trelative error %g,\telapsed time %g seconds.\n',...
 norm(At - Ltm' * Ltm, 'fro'), norm(At - Ltm' * Ltm, 'fro') / norm(At, 'fro'), t2);
 
 fprintf('Call dcud up:\n'); 
-tic; [Ltu, info] = test_dchud(L, 1, x); t2 = toc;
+tic; [Ltu, info] = dchud(L, 1, x); t2 = toc;
 fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
 norm(At - Ltu' * Ltu, 'fro'), norm(At - Ltu' * Ltu, 'fro') / norm(At, 'fro'), t2, info);
 
 fprintf('Call dcud lo:\n'); 
-tic; [Ltl, info] = test_dchud(L', 0, x); t2 = toc;
+tic; [Ltl, info] = dchud(L', 0, x); t2 = toc;
 fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
 norm(At - Ltl * Ltl', 'fro'), norm(At - Ltl * Ltl', 'fro') / norm(At, 'fro'), t2, info);
