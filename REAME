@@ -1,5 +1,10 @@
 Extensions to MKL library:
 
-- Cholesky updates (import of LINPACK featres)
-- ARPACK and PROPACK
-- utils
+- Cholesky updates (import of LINPACK features)
+- QR updates
+- Utils
+- ARPACK
+- PROPACK
+- Blopex: http://code.google.com/p/blopex/
+- LMSVD
+- Random factorizations

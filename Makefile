@@ -3,7 +3,7 @@
 # GENERATE_PROFILE = 1 
 # USE_PROFILE = 1
 DEBUG_MODE = 1
-
+USE_MKL = 1
 # USE_GCC = 1
 ifdef USE_GCC
 	include gcc.mk
@@ -20,25 +20,33 @@ BINDIR = $(ROOTDIR)/bin
 INCLUDES += -I$(INCLUDEDIR)
 LIBS += -L$(LIBDIR)
 
-all: mkl_ext tests
-	
-tests: $(MEXDIR)/test_cholesky.$(MEXEXT)
+all: tests
 
-mkl_ext: $(SRCDIR)/mkl_cholesky.o
-	$(CC) -shared -Wl,-soname,$(LIBDIR)/lib$@.so.1 -o $(LIBDIR)/lib$@.so.1.0.0 $^
-	ln -sf  $(LIBDIR)/lib$@.so.1.0.0 $(LIBDIR)/lib$@.so.1
-	ln -sf  $(LIBDIR)/lib$@.so.1 $(LIBDIR)/lib$@.so
+#$(LIBDIR)/libmkl_ext.so: $(SRCDIR)/mkl_cholesky.o
+#	$(CC) -shared -Wl,-soname,$@.1 -o $@.1.0.0 $^
+#	ln -sf  $@.1.0.0 $@.1
+#	ln -sf  $@.1 $@
+
+tests: \
+	$(MEXDIR)/test_dchud.$(MEXEXT) \
+	$(MEXDIR)/test_dchdd.$(MEXEXT)
+
+# test mex executable 
+$(MEXDIR)/test_dchud.$(MEXEXT): $(MEXDIR)/test_dchud.o $(SRCDIR)/cholesky.o
+	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
 	
-## test mex executable 
-$(MEXDIR)/test_cholesky.$(MEXEXT): $(MEXDIR)/test_cholesky.o 
-	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -lmkl_ext -o $@ $<
-#
+$(MEXDIR)/test_dchdd.$(MEXEXT): $(MEXDIR)/test_dchdd.o $(SRCDIR)/cholesky.o
+	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
+
 # mex object files
-$(MEXDIR)/%.o: $(MEXDIR)/%.cpp $(INCLUDEDIR)/mkl_cholesky.h
+$(MEXDIR)/test_dchud.o: $(MEXDIR)/test_dchud.cpp $(INCLUDEDIR)/blas_ext.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+	
+$(MEXDIR)/test_dchdd.o: $(MEXDIR)/test_dchdd.cpp $(INCLUDEDIR)/blas_ext.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 	
 # src object files
-$(SRCDIR)/%.o: $(SRCDIR)/%.cpp $(INCLUDEDIR)/%.h
+$(SRCDIR)/%.o: $(SRCDIR)/%.cpp $(INCLUDEDIR)/%.h $(INCLUDEDIR)/blas_ext.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 	
 clean:	

@@ -1,16 +1,8 @@
 MKLDIR = /usr/local/intel/mkl
-MATLABDIR = /usr/local/matlabR2009a
-ifdef USE_CUDA
-	CULADIR = /usr/local/cula
-	CUDADIR = /usr/local/cuda
-endif
+MATLABDIR = /usr/local/matlab
 
 MATLABARCH = glnxa64
 MKLARCH = intel64
-ifdef USE_CUDA
-	CULAARCH = lib64
-	CUDAARCH = lib64
-endif
 MEXEXT = $(shell $(MATLABDIR)/bin/mexext)
 MAPFILE = mexFunction.map
 
@@ -50,12 +42,5 @@ else
 		CFLAGS += $(REPORTSFLAGS) 
 	endif
 endif 
-
-ifdef USE_CUDA
-	CFLAGS += -DUSE_CUDA
-	NVCC = nvcc
-	NVCFLAGS = -ccbin=$(CC) -O3 -g -arch=sm_13 -Xcompiler -O3 -Xcompiler -march=native -Xcompiler -fPIC -Xcompiler -m64 -Xcompiler -fexceptions -Xcompiler -fno-omit-frame-pointer -Xcompiler -Wall
-	NVCFLAGS += $(MKLFLAGS) 
-endif
 
 LDFLAGS = -pthread -shared -Wl,--version-script,$(MATLABDIR)/extern/lib/$(MATLABARCH)/$(MAPFILE) -Wl,--no-undefined
