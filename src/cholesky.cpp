@@ -130,122 +130,104 @@ void dchdd(char* uplo, BlasInt* n, double* x, BlasInt* incx, double* a,
 	dchdd_sub(uplo, n, a, work, info);
 }
 
-//void dchr(char* uplo, BlasInt* N, double* alpha, double* x, BlasInt* incx, \
-//		double* a, BlasInt* lda, double* work, BlasInt* lwork, BlasInt* info) {
-//
-//	if (*lda != *N) {
-//		*info = - 7;
-//		return;
-//	}
-//	if (*lwork == -1) {
-//		*work = (double) 3 * (*N);
-//		*info = 0;
-//		return;
-//	} else if (*lwork < 3 * *N) {
-//		*info = - 9;
-//		return;
-//	}
-//
-//	double* wvec = &work[2 * *N];
-//	double mult = sqrt(*alpha);
-//	BlasInt incy = 1;
-//	dcopy(N, x, incx, wvec, &incy);
-//	dscal(N, &mult, wvec, &incy);
-//	if (*alpha > 0) {
-//		dchud(uplo, N, a, work, info);
-//	} else if (*alpha < 0){
-//		dchdd(uplo, N, a, work, info);
-//	} else {
-//		*info = 0;
-//	}
-//}
-//
-//void dchmv(char* uplo, BlasInt* N, double* a, BlasInt* lda, double* x, \
-//			BlasInt* incx) {
-//	char diag = 'N';
-//	if (*uplo == 'U') {
-//		/* a is U, upper triangular, A * x = U' * (U * x) */
-//		char trans = 'N';
-//		dtrmv(uplo, &trans, &diag, N, a, lda, x, incx);
-//		trans = 'T';
-//		dtrmv(uplo, &trans, &diag, N, a, lda, x, incx);
-//	} else if (*uplo == 'L') {
-//		/* a is L, lower triangular, A * x = L * (L' * x) */
-//		char trans = 'T';
-//		dtrmv(uplo, &trans, &diag, N, a, lda, x, incx);
-//		trans = 'N';
-//		dtrmv(uplo, &trans, &diag, N, a, lda, x, incx);
-//	}
-//}
-//
-//void dchrk(char* uplo, char* trans, BlasInt* N, BlasInt* K, double* alpha, \
-//			double* a, BlasInt* lda, double* c, BlasInt* ldc, double* work, \
-//			BlasInt* lwork, BlasInt* info) {
-//
-//	if ((*trans == 'N') && (*lda != *N)) {
-//		*info = - 7;
-//		return;
-//	} else if ((*trans == 'T') && (*lda != *K)) {
-//		*info = - 7;
-//		return;
-//	}
-//	if (*ldc != *N) {
-//		*info = - 9;
-//		return;
-//	}
-//	if (*lwork == -1) {
-//		*work = (double) 3 * *N;
-//		*info = 0;
-//		return;
-//	} else if (*lwork < 3 * *N) {
-//		*info = - 11;
-//		return;
-//	}
-//
-//	if (*trans == 'N') {
-//		BlasInt incx = 1;
-//		for (BlasInt iter = 0; iter < *K; ++iter) {
-//			dchr(uplo, N, alpha, &a[iter * *N], &incx, c, lda, work, lwork, info);
-//		}
-//	} else if (*trans == 'L') {
-//		BlasInt incx = *K;
-//		for (BlasInt iter = 0; iter < *K; ++iter) {
-//			dchr(uplo, N, alpha, &a[iter], &incx, c, lda, work, lwork, info);
-//		}
-//	}
-//}
-//
-//void dchmm(char* uplo, char* side, BlasInt* M, BlasInt* N, double* alpha, \
-//			double* a, BlasInt* lda, double* b, BlasInt* ldb) {
-//	char diag = 'N';
-//	double done = 1.0;
-//	if (*side == 'L') {
-//		if (*uplo == 'U') {
-//			/* a is U, upper triangular, A * B = U' * (U * B) */
-//			char trans = 'N';
-//			dtrmm(side, uplo, &trans, &diag, M, N, &done, a, lda, b, ldb);
-//			trans = 'T';
-//			dtrmm(side, uplo, &trans, &diag, N, N, alpha, a, lda, b, ldb);
-//		} else if (*uplo == 'L') {
-//			/* a is L, lower triangular, A * B = L * (L' * B) */
-//			char trans = 'T';
-//			dtrmm(side, uplo, &trans, &diag, M, N, &done, a, lda, b, ldb);
-//			trans = 'N';
-//			dtrmm(side, uplo, &trans, &diag, M, N, alpha, a, lda, b, ldb);
-//		}
-//	} else if (*side == 'R') {
-//		if (*uplo == 'U') {
-//			/* a is U, upper triangular, B * A = (B * U') * U */
-//			char trans = 'T';
-//			dtrmm(side, uplo, &trans, &diag, M, N, &done, a, lda, b, ldb);
-//			trans = 'N';
-//			dtrmm(side, uplo, &trans, &diag, N, N, alpha, a, lda, b, ldb);
-//		} else if (*uplo == 'L') {
-//			/* a is L, lower triangular, B * A = (B * L) * L' */
-//			char trans = 'N';
-//			dtrmm(side, uplo, &trans, &diag, M, N, &done, a, lda, b, ldb);
-//			trans = 'T';
-//			dtrmm(side, uplo, &trans, &diag, M, N, alpha, a, lda, b, ldb);
-//		}
-//	}
-//}
+void dchr_sub(char* uplo, BlasInt* n, double* alpha, double* a, double* work,
+			BlasInt* info) {
+	if (*alpha > 0) {
+		const BlasInt ione = 1;
+		const double mult = sqrt(*alpha);
+		dscal(n, &mult, work, &ione);
+		dchud_sub(uplo, n, a, work, info);
+	} else if (*alpha < 0) {
+		const BlasInt ione = 1;
+		const double mult = sqrt(- *alpha);
+		dscal(n, &mult, work, &ione);
+		dchdd_sub(uplo, n, a, work, info);
+	} else {
+		*info = 0;
+	}
+}
+
+void dchr(char* uplo, BlasInt* n, double *alpha, double* x, BlasInt* incx,
+		double* a, double* work, BlasInt* info) {
+	const BlasInt ione = 1;
+	dcopy(n, x, incx, work, &ione);
+	dchr_sub(uplo, n, alpha, a, work, info);
+}
+
+void dchmv(char* uplo, BlasInt* n, double* a, double* x, BlasInt* incx) {
+	const char diag = 'N';
+	char transFirst;
+	char transSecond;
+	if (*uplo == 'U') {
+		/* a is U, upper triangular, A * x = U' * (U * x) */
+		transFirst = 'N';
+		transSecond = 'T';
+	} else if (*uplo == 'L') {
+		/* a is L, lower triangular, A * x = L * (L' * x) */
+		transFirst = 'T';
+		transSecond = 'N';
+	}
+	dtrmv(uplo, &transFirst, &diag, n, a, n, x, incx);
+	dtrmv(uplo, &transSecond, &diag, n, a, n, x, incx);
+}
+
+/*
+ * TODO: May make sense to provide option(s) for
+ * 1) work being the size of a plus 2; or
+ * 2) custom dchud and dchdd working directly on v and work of size 2*n; or
+ * 3) only avoid the multiple rescalings in dchr, and otherwise keep the same.
+ */
+void dchrk(char* uplo, char* trans, BlasInt* n, BlasInt* k, double* alpha,
+		double* a, double* c, double* work, BlasInt* info) {
+	if (*trans == 'N') {
+		BlasInt incx = 1;
+		for (BlasInt iter = 0; iter < *k; ++iter) {
+			dchr(uplo, n, alpha, &a[iter * *n], &incx, c, work, info);
+			if (*info != 0) {
+				break;
+			}
+		}
+	} else if (*trans == 'L') {
+		BlasInt incx = *k;
+		for (BlasInt iter = 0; iter < *k; ++iter) {
+			dchr(uplo, n, alpha, &a[iter], &incx, c, work, info);
+			if (*info != 0) {
+				break;
+			}
+		}
+	}
+}
+
+void dchmm(char* side, char* uplo, BlasInt* m, BlasInt* n, double* alpha,
+		double* a, double* b) {
+	const char diag = 'N';
+	const double done = 1.0;
+	char transFirst;
+	char transSecond;
+	BlasInt* lda;
+	if (*side == 'L') {
+		lda = m;
+		if (*uplo == 'U') {
+			/* a is U, upper triangular, A * B = U' * (U * B) */
+			transFirst = 'N';
+			transSecond = 'T';
+		} else if (*uplo == 'L') {
+			/* a is L, lower triangular, A * B = L * (L' * B) */
+			transFirst = 'T';
+			transSecond = 'N';
+		}
+	} else if (*side == 'R') {
+		lda = n;
+		if (*uplo == 'U') {
+			/* a is U, upper triangular, B * A = (B * U') * U */
+			transFirst = 'T';
+			transSecond = 'N';
+		} else if (*uplo == 'L') {
+			/* a is L, lower triangular, B * A = (B * L) * L' */
+			transFirst = 'N';
+			transSecond = 'T';
+		}
+	}
+	dtrmm(side, uplo, &transFirst, &diag, m, n, &done, a, lda, b, m);
+	dtrmm(side, uplo, &transSecond, &diag, m, n, alpha, a, lda, b, m);
+}

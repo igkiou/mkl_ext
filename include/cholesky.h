@@ -15,6 +15,11 @@ extern "C"
 
 #include "blas_header.h"
 
+/*
+ * TODO: Maybe add lda and lwork arguments for uniformity with BLAS calls? In
+ * that case, also add argument checks and errors in info.
+ */
+
 void dchud_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info);
 
 void dchud(char* uplo, BlasInt* n, double* x, BlasInt* incx, double* a,
@@ -25,18 +30,19 @@ void dchdd_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info);
 void dchdd(char* uplo, BlasInt* n, double* x, BlasInt* incx, double* a,
 		double* work, BlasInt* info);
 
-//void dchr(char* uplo, BlasInt* n, double* alpha, double* x, BlasInt* incx,
-//		double* a, BlasInt* lda, double* work, BlasInt* lwork, BlasInt* info);
-//
-//void dchmv(char* uplo, BlasInt* n, double* a, BlasInt* lda, double* x,
-//		BlasInt* incx);
-//
-//void dchrk(char* uplo, char* trans, BlasInt* n, BlasInt* K, double* alpha,
-//		double* a, BlasInt* lda, double* c, BlasInt* ldc, double* work,
-//		BlasInt* lwork, BlasInt* info);
-//
-//void dchmm(char* uplo, char* side, BlasInt* m, BlasInt* n, double* alpha,
-//		double* a, BlasInt* lda, double* b, BlasInt* ldb);
+void dchr_sub(char* uplo, BlasInt* n, double* alpha, double* a, double* work,
+			BlasInt* info);
+
+void dchr(char* uplo, BlasInt* n, double* alpha, double* x, BlasInt* incx,
+		double* a, double* work, BlasInt* info);
+
+void dchmv(char* uplo, BlasInt* n, double* a, double* x, BlasInt* incx);
+
+void dchrk(char* uplo, char* trans, BlasInt* n, BlasInt* k, double* alpha,
+		double* a, double* c, double* work, BlasInt* info);
+
+void dchmm(char* side, char* uplo, BlasInt* m, BlasInt* n, double* alpha,
+		double* a, double* b);
 
 //void CHOA();
 //void CHOD();

@@ -324,6 +324,32 @@ inline void blasDchud(char* uplo, BlasInt* n, double* x, BlasInt* incx,
 	dchud(uplo, n, x, incx, a, work, info);
 }
 
+inline void blasDchdd(char* uplo, BlasInt* n, double* x, BlasInt* incx,
+					double* a, double* work, BlasInt* info) {
+	dchdd(uplo, n, x, incx, a, work, info);
+}
+
+inline void blasDchr(char* uplo, BlasInt* n, double* alpha, double* x,
+					BlasInt* incx, double* a, double* work, BlasInt* info) {
+	dchr(uplo, n, alpha, x, incx, a, work, info);
+}
+
+inline void blasDchmv(char* uplo, BlasInt* n, double* a, double* x,
+					BlasInt* incx) {
+	dchmv(uplo, n, a, x, incx);
+}
+
+inline void blasDchrk(char* uplo, char* trans, BlasInt* n, BlasInt* k,
+					double* alpha, double* a, double* c, double* work,
+					BlasInt* info) {
+	dchrk(uplo, trans, n, k, alpha, a, c, work, info);
+}
+
+inline void blasDchmm(char* side, char* uplo, BlasInt* m, BlasInt* n,
+					double* alpha, double* a, double* b) {
+	dchmm(side, uplo, m, n, alpha, a, b);
+}
+
 /*
  * QR update.
  */
