@@ -33,7 +33,8 @@ tests: \
 	$(MEXDIR)/dchr.$(MEXEXT) \
 	$(MEXDIR)/dchmv.$(MEXEXT) \
 	$(MEXDIR)/dchrk.$(MEXEXT) \
-	$(MEXDIR)/dchmm.$(MEXEXT)
+	$(MEXDIR)/dchmm.$(MEXEXT) \
+	$(MEXDIR)/dchex.$(MEXEXT)
 
 # test mex executable 
 $(MEXDIR)/dchud.$(MEXEXT): $(MEXDIR)/dchud.o $(SRCDIR)/cholesky.o
@@ -53,6 +54,9 @@ $(MEXDIR)/dchrk.$(MEXEXT): $(MEXDIR)/dchrk.o $(SRCDIR)/cholesky.o
 	
 $(MEXDIR)/dchmm.$(MEXEXT): $(MEXDIR)/dchmm.o $(SRCDIR)/cholesky.o
 	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
+	
+$(MEXDIR)/dchex.$(MEXEXT): $(MEXDIR)/dchex.o $(SRCDIR)/cholesky.o
+	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
 
 # mex object files
 $(MEXDIR)/dchud.o: $(MEXDIR)/dchud.cpp $(INCLUDEDIR)/blas_ext.h
@@ -71,6 +75,9 @@ $(MEXDIR)/dchrk.o: $(MEXDIR)/dchrk.cpp $(INCLUDEDIR)/blas_ext.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 	
 $(MEXDIR)/dchmm.o: $(MEXDIR)/dchmm.cpp $(INCLUDEDIR)/blas_ext.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+	
+$(MEXDIR)/dchex.o: $(MEXDIR)/dchex.cpp $(INCLUDEDIR)/blas_ext.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 	
 # src object files

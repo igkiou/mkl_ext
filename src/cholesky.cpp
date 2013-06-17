@@ -231,3 +231,107 @@ void dchmm(char* side, char* uplo, BlasInt* m, BlasInt* n, double* alpha,
 	dtrmm(side, uplo, &transFirst, &diag, m, n, &done, a, lda, b, m);
 	dtrmm(side, uplo, &transSecond, &diag, m, n, alpha, a, lda, b, m);
 }
+
+void dchex(double* a, BlasInt* n, BlasInt* k, BlasInt* l, double* work,
+		BlasInt* job) {
+//	dchex_(a, &n, &n, &k, &l, xmat, &n, &nz, cvec, svec, &job);
+
+	const BlasInt N = *n;
+	const BlasInt L = *l;
+	const BlasInt K = *k;
+	const BlasInt lmk = L - K;
+	const BlasInt lm1 = L - 1;
+	double* cvec = work;
+	double* svec = &work[N];
+
+	if (*job == 1) {
+		for (BlasInt iterI = 1; iterI <= L; ++iterI) {
+			BlasInt iterII = L - iterI + 1;
+			svec[iterI - 1] = a[(L - 1) * N + iterII - 1];
+		}
+
+		for (BlasInt iterJJ = K; iterJJ <= lm1; ++iterJJ) {
+			BlasInt iterJ = lm1 - iterJJ + K;
+			for (BlasInt iterI = 1; iterI <= iterJ; ++iterI) {
+				a[iterJ * N + iterI - 1] = a[(iterJ - 1) * N + iterI - 1];
+			}
+			a[iterJ * N + iterJ] = 0.0;
+		}
+
+		for (BlasInt iterI = 1; iterI <= K - 1; ++iterI) {
+			BlasInt iterII = L - iterI + 1;
+			a[(K - 1) * N + iterI - 1] = svec[iterII - 1];
+		}
+
+		double t = svec[0];
+		for (BlasInt iterI = 1; iterI <= lmk; ++iterI) {
+			drotg(&svec[iterI], &t, &cvec[iterI - 1], &svec[iterI - 1]);
+			t = svec[iterI];
+		}
+
+		a[(K - 1) * (N + 1)] = t;
+		for (BlasInt iterJ = K + 1; iterJ <= N; ++iterJ) {
+			BlasInt iterIL = (L - iterJ + 1 > 1)?(L - iterJ + 1):(1);
+			for (BlasInt iterII = iterIL; iterII <= lmk; ++iterII) {
+				BlasInt iterI = L - iterII;
+				t = cvec[iterII - 1] * a[(iterJ - 1) * N + iterI - 1]
+				  + svec[iterII - 1] * a[(iterJ - 1) * N + iterI];
+				a[(iterJ - 1) * N + iterI] = cvec[iterII - 1]
+				              * a[(iterJ - 1) * N + iterI]
+				              - svec[iterII - 1]
+				              * a[(iterJ - 1) * N + iterI - 1];
+				a[(iterJ - 1) * N + iterI - 1] = t;
+			}
+		}
+	} else if (*job == 2) {
+		for (BlasInt iterI = 1; iterI <= K; ++iterI) {
+			BlasInt iterII = lmk + iterI;
+			svec[iterII - 1] = a[(K - 1) * N + iterI - 1];
+		}
+
+		for (BlasInt iterJ = K; iterJ <= lm1; ++iterJ) {
+			for (BlasInt iterI = 1; iterI <= iterJ; ++iterI) {
+				a[(iterJ - 1) * N + iterI - 1] = a[iterJ * N + iterI - 1];
+			}
+			BlasInt iterJJ = iterJ - K + 1;
+			svec[iterJJ - 1] = a[iterJ * N + iterJ];
+		}
+
+		for (BlasInt iterI = 1; iterI <= K; ++iterI) {
+			BlasInt iterII = lmk + iterI;
+			a[(L - 1) * N + iterI - 1] = svec[iterII - 1];
+		}
+
+		memset((void *) &a[(L - 1) * N + K], 0, lmk * sizeof(double));
+
+		for (BlasInt iterJ = K; iterJ <= N; ++iterJ) {
+			if (iterJ != K) {
+				BlasInt iterIU = (iterJ - 1 < L - 1)?(iterJ - 1):(L - 1);
+
+				for (BlasInt iterI = K; iterI <= iterIU; ++iterI) {
+					BlasInt iterII = iterI - K + 1;
+					double t = cvec[iterII - 1] * a[(iterJ - 1) * N + iterI - 1]
+					         + svec[iterII - 1] * a[(iterJ - 1) * N + iterI];
+					a[(iterJ - 1) * N + iterI] = cvec[iterII - 1]
+					                           * a[(iterJ - 1) * N + iterI]
+					                           - svec[iterII - 1]
+					                           * a[(iterJ - 1) * N + iterI - 1];
+					a[(iterJ - 1) * N + iterI - 1] = t;
+				}
+			}
+
+			if (iterJ < L) {
+				BlasInt iterJJ = iterJ - K + 1;
+				double t = svec[iterJJ - 1];
+				drotg(&a[(iterJ - 1) * N + iterJ - 1], &t, &cvec[iterJJ - 1],
+					&svec[iterJJ - 1]);
+			}
+		}
+	}
+
+	for (BlasInt iterJ = K; iterJ <= L; ++iterJ) {
+		BlasInt iterJJ = N - iterJ + 1;
+		double t = -1.0;
+		dscal(&iterJJ, &t, &a[(iterJ - 1) * (N + 1)], &N);
+	}
+}

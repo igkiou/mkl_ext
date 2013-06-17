@@ -44,6 +44,9 @@ void dchrk(char* uplo, char* trans, BlasInt* n, BlasInt* k, double* alpha,
 void dchmm(char* side, char* uplo, BlasInt* m, BlasInt* n, double* alpha,
 		double* a, double* b);
 
+void dchex(double* a, BlasInt* n, BlasInt* k, BlasInt* l, double* work,
+		BlasInt* job);
+
 //void CHOA();
 //void CHOD();
 //void CHOAK();
