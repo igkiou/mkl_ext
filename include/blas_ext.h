@@ -350,6 +350,10 @@ inline void blasDchmm(char* side, char* uplo, BlasInt* m, BlasInt* n,
 	dchmm(side, uplo, m, n, alpha, a, b);
 }
 
+inline void blasDchd(double* a, BlasInt* n, BlasInt* k, double* work) {
+	dchd(a, n, k, work);
+}
+
 /*
  * QR update.
  */

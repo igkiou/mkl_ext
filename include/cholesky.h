@@ -47,10 +47,11 @@ void dchmm(char* side, char* uplo, BlasInt* m, BlasInt* n, double* alpha,
 void dchex(double* a, BlasInt* n, BlasInt* k, BlasInt* l, double* work,
 		BlasInt* job);
 
-//void CHOA();
-//void CHOD();
-//void CHOAK();
-//void CHODK();
+void dchd(double* a, BlasInt* n, BlasInt* k, double* work);
+
+//void dchdk(double* a, BlasInt* n, BlasInt* k, BlasInt* m, double* work);
+//void dcha(double* a, BlasInt* n, BlasInt* k, double* work);
+//void dchak(double* a, BlasInt* n, BlasInt* k, BlasInt* m, double* work);
 
 #ifdef __cplusplus
 }

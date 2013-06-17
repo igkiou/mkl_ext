@@ -241,14 +241,17 @@ void dchex(double* a, BlasInt* n, BlasInt* k, BlasInt* l, double* work,
 	const BlasInt K = *k;
 	const BlasInt lmk = L - K;
 	const BlasInt lm1 = L - 1;
+	const BlasInt ione = 1;
+	const BlasInt imone = -1;
 	double* cvec = work;
 	double* svec = &work[N];
 
 	if (*job == 1) {
-		for (BlasInt iterI = 1; iterI <= L; ++iterI) {
-			BlasInt iterII = L - iterI + 1;
-			svec[iterI - 1] = a[(L - 1) * N + iterII - 1];
-		}
+		dcopy(&L, &a[lm1 * N], &imone, svec, &ione);
+//		for (BlasInt iterI = 1; iterI <= L; ++iterI) {
+//			BlasInt iterII = L - iterI + 1;
+//			svec[iterI - 1] = a[(L - 1) * N + iterII - 1];
+//		}
 
 		for (BlasInt iterJJ = K; iterJJ <= lm1; ++iterJJ) {
 			BlasInt iterJ = lm1 - iterJJ + K;
@@ -258,10 +261,12 @@ void dchex(double* a, BlasInt* n, BlasInt* k, BlasInt* l, double* work,
 			a[iterJ * N + iterJ] = 0.0;
 		}
 
-		for (BlasInt iterI = 1; iterI <= K - 1; ++iterI) {
-			BlasInt iterII = L - iterI + 1;
-			a[(K - 1) * N + iterI - 1] = svec[iterII - 1];
-		}
+		BlasInt size = K - 1;
+		dcopy(&size, &svec[L - K + 1], &imone, &a[(K - 1) * N], &ione);
+//		for (BlasInt iterI = 1; iterI <= K - 1; ++iterI) {
+//			BlasInt iterII = L - iterI + 1;
+//			a[(K - 1) * N + iterI - 1] = svec[iterII - 1];
+//		}
 
 		double t = svec[0];
 		for (BlasInt iterI = 1; iterI <= lmk; ++iterI) {
@@ -335,3 +340,19 @@ void dchex(double* a, BlasInt* n, BlasInt* k, BlasInt* l, double* work,
 		dscal(&iterJJ, &t, &a[(iterJ - 1) * (N + 1)], &N);
 	}
 }
+
+void dchd(double* a, BlasInt* n, BlasInt* k, double* work) {
+	BlasInt job = 2;
+	dchex(a, n, k, n, work, &job);
+}
+
+/*
+ * TODO: This does not work because of continuous storage of a.
+ */
+//void dchdk(double* a, BlasInt* n, BlasInt* k, BlasInt* m, double* work) {
+//	BlasInt job = 2;
+//	for (BlasInt iter = 0; iter < *m; ++iter) {
+//		BlasInt N = n - iter;
+//		dchex(a, &N, &k[iter], &N, work, &job);
+//	}
+//}
