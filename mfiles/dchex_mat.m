@@ -1,4 +1,4 @@
-function [ r, z, c, s ] = dchex ( r, ldr, p, k, l, z, ldz, nz, job )
+function [ r, z, c, s ] = dchex_mat ( r, ldr, p, k, l, z, ldz, nz, job )
 
 %*****************************************************************************80
 %
@@ -149,7 +149,7 @@ function [ r, z, c, s ] = dchex ( r, ldr, p, k, l, z, ldz, nz, job )
 %
     t = s(1);
     for i = 1 : lmk
-      [ c(i), s(i), s(i+1), t ] = drotg ( s(i+1), t );
+      [ c(i), s(i), s(i+1), t ] = drotg_mat ( s(i+1), t );
       t = s(i+1);
     end
 
@@ -224,7 +224,7 @@ function [ r, z, c, s ] = dchex ( r, ldr, p, k, l, z, ldz, nz, job )
       if ( j < l )
         jj = j - k + 1;
         t = s(jj);
-        [ c(jj), s(jj), r(j,j), t ] = drotg ( r(j,j), t );
+        [ c(jj), s(jj), r(j,j), t ] = drotg_mat ( r(j,j), t );
       end
 
     end
