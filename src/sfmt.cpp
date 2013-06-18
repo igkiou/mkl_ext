@@ -63,10 +63,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "debug_util.h"
-#include "sse.h"
-
 #include "sfmt.h"
+#include "sse.h"
 
 /************************ SFMT-19937 Parameters *******************************/
 

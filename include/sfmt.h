@@ -46,6 +46,123 @@
 
 typedef uint64_t SFMTEngineSeedType;
 
+typedef struct SFMTEngineState {
+	union {
+		/** the 128-bit internal state array */
+		w128_t sfmt[N];
+		/** the 32bit integer version of the 128-bit internal state array */
+		uint32_t psfmt32[N32];
+		/** the 64bit integer version of the 128-bit internal state array */
+		uint64_t psfmt64[N64];
+	};
+
+	/** index counter to the 32-bit internal state array */
+	int idx;
+
+	/** a parity check vector which certificate the period of 2^{MEXP} */
+	const static uint32_t parity[4];
+
+	/** Hash of the SFMT parameters */
+	const static uint32_t s_magic;
+
+	/* Default constructor, set the index to an invalid value */
+	State() : idx(-1) {}
+} SFMTEngineState;
+
+inline bool isInitialized(const SFMTEngineState* state) {
+	return state->idx >= 0;
+}
+
+void init_gen_rand(SFMTEngineState* state, uint64_t seed);
+
+void init_by_array(SFMTEngineState* state, const uint32_t *init_key,
+					int key_length);
+
+inline uint64_t gen_rand64(SFMTEngineState* state) {
+	if (state->idx >= N32) {
+		gen_rand_all(state);
+		state->idx = 0;
+	}
+
+	uint64_t r = state->psfmt64[state->idx / 2];
+	state->idx += 2;
+	return r;
+}
+
+static inline uint32_t func1(uint32_t x) {
+	return (x ^ (x >> 27)) * (uint32_t)1664525UL;
+}
+
+static inline uint32_t func2(uint32_t x) {
+	return (x ^ (x >> 27)) * (uint32_t)1566083941UL;
+}
+
+void period_certification(SFMTEngineState* state) {
+	int inner = 0;
+	int i, j;
+	uint32_t work;
+
+	for (i = 0; i < 4; ++i)
+		inner ^= state->psfmt32[i] & state->parity[i];
+	for (i = 16; i > 0; i >>= 1)
+		inner ^= inner >> i;
+	inner &= 1;
+	/* check OK */
+	if (inner == 1) {
+		return;
+	}
+	/* check NG, and modification */
+	for (i = 0; i < 4; ++i) {
+		work = 1;
+		for (j = 0; j < 32; ++j) {
+			if ((work & state->parity[i]) != 0) {
+				state->psfmt32[i] ^= work;
+				return;
+			}
+			work = work << 1;
+		}
+	}
+}
+
+inline void gen_rand_all(SFMTEngineState* state) {
+	int i;
+	__m128i r, r1, r2, mask;
+	mask = _mm_set_epi32(MSK4, MSK3, MSK2, MSK1);
+
+	r1 = _mm_load_si128(&(state->sfmt[N - 2].si));
+	r2 = _mm_load_si128(&(state->sfmt[N - 1].si));
+	for (i = 0; i < N - POS1; ++i) {
+		r = mm_recursion(state->sfmt[i].si, state->sfmt[i + POS1].si, r1, r2, mask);
+		_mm_store_si128(&(state->sfmt[i].si), r);
+		r1 = r2;
+		r2 = r;
+	}
+	for (; i < N; ++i) {
+		r = mm_recursion(&(state->sfmt[i].si), state->sfmt[i + POS1 - N].si, r1, r2, mask);
+		_mm_store_si128(&(state->sfmt[i].si), r);
+		r1 = r2;
+		r2 = r;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class SSEEngine {
 public:
 	SSEEngine();
