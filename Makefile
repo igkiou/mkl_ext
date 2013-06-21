@@ -1,15 +1,7 @@
-# PRODUCE_REPORTS = 1 
-# USE_GUIDE = 1
-# GENERATE_PROFILE = 1 
-# USE_PROFILE = 1
-DEBUG_MODE = 1
-USE_MKL = 1
 # USE_GCC = 1
-ifdef USE_GCC
-	include gcc.mk
-else
-	include icc.mk
-endif
+USE_BLAS = MKL
+USE_RNG = VSL
+USE_RNG_NORMAL = BOXMULLER
 
 ROOTDIR = $(shell pwd)
 INCLUDEDIR = $(ROOTDIR)/include
@@ -17,8 +9,38 @@ LIBDIR = $(ROOTDIR)/lib
 SRCDIR = $(ROOTDIR)/src
 MEXDIR = $(ROOTDIR)/mexfiles
 BINDIR = $(ROOTDIR)/bin
-INCLUDES += -I$(INCLUDEDIR)
-LIBS += -L$(LIBDIR)
+INCLUDES = -I$(INCLUDEDIR)
+LIBS = -L$(LIBDIR)
+
+ifeq ($(USE_GCC), 1)
+	include gcc.mk
+else
+	include icc.mk
+endif
+
+include matlab.mk
+
+ifeq ($(USE_BLAS), MKL)
+	include mkl.mk
+	CFLAGS += -DUSE_BLAS_MKL
+endif
+
+ifeq ($(USE_RNG), VSL)
+	include vsl.mk
+	CFLAGS += -DUSE_RNG_VSL
+else ifeq ($(USE_RNG), SFMT)
+	include sfmt.mk
+	CFLAGS += -DUSE_RNG_SFMT
+else ifeq ($(USE_RNG), DSFMT)
+	include dsfmt.mk
+	CFLAGS += -DUSE_RNG_DSFMT
+endif
+
+ifeq ($(USE_RNG_NORMAL), MARSAGLIA)
+	CFLAGS += -DUSE_RNG_MARSAGLIA
+else ifeq ($(USE_RNG_NORMAL), BOXMULLER)
+	CFLAGS += -DUSE_RNG_BOX_MULLER
+endif
 
 all: tests
 
@@ -27,7 +49,9 @@ all: tests
 #	ln -sf  $@.1.0.0 $@.1
 #	ln -sf  $@.1 $@
 
-tests: \
+tests: tests_cholesky tests_rng
+	
+tests_cholesky: \
 	$(MEXDIR)/dchud.$(MEXEXT) \
 	$(MEXDIR)/dchdd.$(MEXEXT) \
 	$(MEXDIR)/dchr.$(MEXEXT) \
@@ -35,6 +59,11 @@ tests: \
 	$(MEXDIR)/dchrk.$(MEXEXT) \
 	$(MEXDIR)/dchmm.$(MEXEXT) \
 	$(MEXDIR)/dchex.$(MEXEXT)
+
+tests_rng: \
+	$(MEXDIR)/drnorm.$(MEXEXT) \
+	$(MEXDIR)/drunif.$(MEXEXT) \
+	$(MEXDIR)/irunif.$(MEXEXT) \
 
 # test mex executable 
 $(MEXDIR)/dchud.$(MEXEXT): $(MEXDIR)/dchud.o $(SRCDIR)/cholesky.o
@@ -57,27 +86,18 @@ $(MEXDIR)/dchmm.$(MEXEXT): $(MEXDIR)/dchmm.o $(SRCDIR)/cholesky.o
 	
 $(MEXDIR)/dchex.$(MEXEXT): $(MEXDIR)/dchex.o $(SRCDIR)/cholesky.o
 	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
+	
+$(MEXDIR)/drnorm.$(MEXEXT): $(MEXDIR)/drnorm.o $(SRCDIR)/rng.o
+	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
+	
+$(MEXDIR)/drunif.$(MEXEXT): $(MEXDIR)/drunif.o $(SRCDIR)/rng.o
+	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
+	
+$(MEXDIR)/irunif.$(MEXEXT): $(MEXDIR)/irunif.o $(SRCDIR)/rng.o
+	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
 
 # mex object files
-$(MEXDIR)/dchud.o: $(MEXDIR)/dchud.cpp $(INCLUDEDIR)/blas_ext.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
-	
-$(MEXDIR)/dchdd.o: $(MEXDIR)/dchdd.cpp $(INCLUDEDIR)/blas_ext.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
-	
-$(MEXDIR)/dchr.o: $(MEXDIR)/dchr.cpp $(INCLUDEDIR)/blas_ext.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
-	
-$(MEXDIR)/dchmv.o: $(MEXDIR)/dchmv.cpp $(INCLUDEDIR)/blas_ext.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
-	
-$(MEXDIR)/dchrk.o: $(MEXDIR)/dchrk.cpp $(INCLUDEDIR)/blas_ext.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
-	
-$(MEXDIR)/dchmm.o: $(MEXDIR)/dchmm.cpp $(INCLUDEDIR)/blas_ext.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
-	
-$(MEXDIR)/dchex.o: $(MEXDIR)/dchex.cpp $(INCLUDEDIR)/blas_ext.h
+$(MEXDIR)/%.o: $(MEXDIR)/%.cpp $(INCLUDEDIR)/blas_ext.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 	
 # src object files

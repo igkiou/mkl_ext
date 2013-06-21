@@ -12,8 +12,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef USE_MKL
-#include "mkl_header.h"
+#ifdef USE_BLAS_MKL
+#include <mkl.h>
+#include <omp.h>
+
+typedef MKL_INT BlasInt;
+#define BLASFUNC(NAME) NAME
 #endif
 
 #ifdef __cplusplus

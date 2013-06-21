@@ -27,8 +27,9 @@
 									<listOptionValue builtIn="false" value="/usr/local/intel/mkl/include"/>
 									<listOptionValue builtIn="false" value="/usr/local/matlab/extern/include"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1702044225" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="USE_MKL"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1702044225" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="USE_RNG_VML"/>
+									<listOptionValue builtIn="false" value="USE_BLAS_MKL"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.624528663" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -37,8 +38,9 @@
 									<listOptionValue builtIn="false" value="/usr/local/matlab/extern/include"/>
 									<listOptionValue builtIn="false" value="/usr/local/intel_parallel_studio_xe_2013_update1/composer_xe_2013.1.117/mkl/include"/>
 								</option>
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.847392970" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="USE_MKL"/>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.847392970" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="USE_RNG_VML"/>
+									<listOptionValue builtIn="false" value="USE_BLAS_MKL"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.91590103" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

@@ -1,0 +1,11 @@
+DSFMTDIR = dSFMT-src-2.2.1
+#ifeq ($(USE_STATIC), 1)
+	DSFMTLIBS = $(DSFMTDIR)/libdsfmt.a
+#else
+#	DSFMTLIBS = -L$(DSFMTDIR) -ldsfmt
+#endif
+LIBS += $(DSFMTLIBS)
+
+DSFMTINCLUDE = -I $(DSFMTDIR) 
+INCLUDES += $(DSFMTINCLUDE)
+CFLAGS += -DHAVE_SSE2=1

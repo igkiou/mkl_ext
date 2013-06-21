@@ -23,7 +23,7 @@ extern "C"
 void dlansvd(char* jobu, char* jobvt, BlasInt* m, BlasInt* n, double* a,
 			double* u, double* vt, BlasInt* k, BlasInt* job);
 
-void dlanbpro()
+void dlanbpro();
 
 //void dchdk(double* a, BlasInt* n, BlasInt* k, BlasInt* m, double* work);
 //void dcha(double* a, BlasInt* n, BlasInt* k, double* work);

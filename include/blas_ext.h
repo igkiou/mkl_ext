@@ -13,6 +13,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "blas_header.h"
+#include "rng.h"
 #include "cholesky.h"
 #include "qr.h"
 #include "arpack.h"
