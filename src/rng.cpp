@@ -11,6 +11,10 @@
 #include "rng.h"
 #define UNUSED(x) (void)(x)
 #define M_PI 3.14159265358979323846
+/*
+ * TODO: Maybe add ziggurat implementation.
+ * TODO: Maybe factor out code for Marsaglia and Box-Muller.
+ */
 
 #if defined(USE_RNG_VSL)
 
@@ -57,14 +61,6 @@ void drnorm(RngEngine* rng, double* buffer, BlasInt* n, BlasInt* isAligned,
 		*info = 0;
 	}
 #endif
-}
-
-void irunif(RngEngine* rng, BlasInt* r, BlasInt* buffer, BlasInt* n,
-			BlasInt* isAligned, RngErrorType* info) {
-	UNUSED(isAligned);
-	*info = (*n > 0)?(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng->m_stream,
-								*n, buffer, 0, *r))
-					:(0);
 }
 
 void rngDestroy(RngEngine* rng, RngErrorType* info) {
@@ -114,17 +110,6 @@ void drnorm(RngEngine* rng, double* buffer, BlasInt* n, BlasInt* isAligned,
 			buffer[iter] = x * sqrt(- 2.0 * log(r) / r);
 		}
 #endif
-	}
-	*info = 0;
-}
-
-void irunif(RngEngine* rng, BlasInt* r, BlasInt* buffer, BlasInt* n,
-			BlasInt* isAligned, RngErrorType* info) {
-	UNUSED(isAligned);
-	if (*n > 0) {
-		for (BlasInt iter = 0; iter < *n; ++iter) {
-			buffer[iter] = (BlasInt) sfmt_genrand_uint32(&(rng->m_sfmt));
-		}
 	}
 	*info = 0;
 }
@@ -179,18 +164,6 @@ void drnorm(RngEngine* rng, double* buffer, BlasInt* n, BlasInt* isAligned,
 			buffer[iter] = x * sqrt(- 2.0 * log(r) / r);
 		}
 #endif
-	}
-	*info = 0;
-}
-
-void irunif(RngEngine* rng, BlasInt* r, BlasInt* buffer, BlasInt* n,
-			BlasInt* isAligned, RngErrorType* info) {
-	UNUSED(isAligned);
-	if (*n > 0) {
-		for (BlasInt iter = 0; iter < *n; ++iter) {
-			double x = dsfmt_genrand_close_open(&(rng->m_dsfmt));
-			buffer[iter] = (BlasInt) floor(*r * x);
-		}
 	}
 	*info = 0;
 }

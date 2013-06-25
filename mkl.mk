@@ -19,4 +19,8 @@ LIBS += $(MKLLIBS)
 MKLINCLUDE= -I $(MKLDIR)/include 
 INCLUDES += $(MKLINCLUDE)
 
-CFLAGS += -m64
+ifeq ($(MKLINT), ilp64)
+	CFLAGS += -DMKL_ILP64
+endif
+
+

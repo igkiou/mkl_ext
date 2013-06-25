@@ -62,8 +62,7 @@ tests_cholesky: \
 
 tests_rng: \
 	$(MEXDIR)/drnorm.$(MEXEXT) \
-	$(MEXDIR)/drunif.$(MEXEXT) \
-	$(MEXDIR)/irunif.$(MEXEXT) \
+	$(MEXDIR)/drunif.$(MEXEXT)
 
 # test mex executable 
 $(MEXDIR)/dchud.$(MEXEXT): $(MEXDIR)/dchud.o $(SRCDIR)/cholesky.o
@@ -93,9 +92,6 @@ $(MEXDIR)/drnorm.$(MEXEXT): $(MEXDIR)/drnorm.o $(SRCDIR)/rng.o
 $(MEXDIR)/drunif.$(MEXEXT): $(MEXDIR)/drunif.o $(SRCDIR)/rng.o
 	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
 	
-$(MEXDIR)/irunif.$(MEXEXT): $(MEXDIR)/irunif.o $(SRCDIR)/rng.o
-	$(CC) $(LDFLAGS) $(LIBS) $(CFLAGS) -o $@ $^
-
 # mex object files
 $(MEXDIR)/%.o: $(MEXDIR)/%.cpp $(INCLUDEDIR)/blas_ext.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<

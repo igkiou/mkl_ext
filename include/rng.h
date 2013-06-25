@@ -58,9 +58,6 @@ void drunif(RngEngine* rng, double* buffer, BlasInt* n, BlasInt* isAligned,
 void drnorm(RngEngine* rng, double* buffer, BlasInt* n, BlasInt* isAligned,
 			RngErrorType* info);
 
-void irunif(RngEngine* rng, BlasInt* r, BlasInt* buffer, BlasInt* n,
-			BlasInt* isAligned, RngErrorType* info);
-
 void rngDestroy(RngEngine* rng, RngErrorType* info);
 
 #ifdef __cplusplus
