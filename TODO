@@ -1,0 +1,6 @@
+-Do rank-one SVD/EIG updates using either LAPACK secular euqation solver, or GLR algorithm, or Cheb-based root finding.
+-QR updates, see papers I printed before SIGGRAPH.
+-Change low-order chol up/down-dates to improved algorithms over LINPACK.
+-random SVD (either my own simple, or redSVD, or port Tygert's implementation).
+-PROPACK port (either exact port of MATLAB code, or port of Matt O'Toole's simplified version).
+-Look into row/column modifications for Chol.
