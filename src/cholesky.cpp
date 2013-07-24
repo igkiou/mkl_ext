@@ -123,6 +123,90 @@ void dchdd_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
 	}
 }
 
+/*
+ * TODO: Assumes that L is upper triangular.
+ */
+void dchdd_sub_mod(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
+	const BlasInt N = *n;
+	const BlasInt ione = 1;
+
+	double* zvec = work;
+//	double* cvec = &work[N];
+//	double* svec = &work[2 * N];
+
+	const BlasInt step = (*uplo == 'L') ? 1 : N;
+
+	double alpha = 1;
+	double alphaPrev;
+	double beta = 1;
+	double betaPrev;
+	double aconst;
+	double ratio;
+	double multConst;
+	double multArg;
+
+	*info = 0;
+	if (*uplo == 'U') {
+		for (BlasInt iterI = 1; iterI <= N; ++iterI) {
+			alphaPrev = alpha;
+			betaPrev = beta;
+			aconst = zvec[iterI - 1] / a[(iterI - 1) * (N + 1)];
+			alpha = alphaPrev - aconst * aconst;
+			/*
+			 * TODO: Change this to eps inequality.
+			 */
+			if (alpha <= 0) {
+				*info = 1;
+				break;
+			}
+			beta = sqrt(alpha);
+			ratio = beta / betaPrev;
+			multConst = aconst / betaPrev / beta;
+			a[(iterI - 1) * (N + 1)] *= ratio;
+			multArg = - aconst;
+			BlasInt K = N - iterI;
+			daxpy(&N, &multArg, &a[(iterI - 1) + iterI * N ], &step, &zvec[iterI], &ione);
+			multArg = - multConst;
+			daxpby(&N, &multArg, &zvec[iterI], &ione, &ratio,
+				&a[(iterI - 1) + iterI * N ], &step);
+	//		for (BlasInt iterK = iterI + 1; iterK <= N; ++iterK) {
+	//			zvec[iterK - 1] -= aconst * a[(iterI - 1) + (iterK - 1) * N];
+	//			a[(iterI - 1) + (iterK - 1) * N] *= ratio;
+	//			a[(iterI - 1) + (iterK - 1) * N] -= multConst * zvec[iterK - 1];
+	//		}
+		}
+	} else {
+		for (BlasInt iterI = 1; iterI <= N; ++iterI) {
+			alphaPrev = alpha;
+			betaPrev = beta;
+			aconst = zvec[iterI - 1] / a[(iterI - 1) * (N + 1)];
+			alpha = alphaPrev - aconst * aconst;
+			/*
+			 * TODO: Change this to eps inequality.
+			 */
+			if (alpha <= 0) {
+				*info = 1;
+				break;
+			}
+			beta = sqrt(alpha);
+			ratio = beta / betaPrev;
+			multConst = aconst / betaPrev / beta;
+			a[(iterI - 1) * (N + 1)] *= ratio;
+			multArg = - aconst;
+			BlasInt K = N - iterI;
+			daxpy(&N, &multArg, &a[iterI + (iterI - 1) * N ], &step, &zvec[iterI], &ione);
+			multArg = - multConst;
+			daxpby(&N, &multArg, &zvec[iterI], &ione, &ratio,
+				&a[iterI + (iterI - 1) * N ], &step);
+	//		for (BlasInt iterK = iterI + 1; iterK <= N; ++iterK) {
+	//			zvec[iterK - 1] -= aconst * a[(iterI - 1) * N + (iterK - 1)];
+	//			a[(iterI - 1) * N + (iterK - 1)] *= ratio;
+	//			a[(iterI - 1) * N + (iterK - 1)] -= multConst * zvec[iterK - 1];
+	//		}
+		}
+	}
+}
+
 void dchdd(char* uplo, BlasInt* n, double* x, BlasInt* incx, double* a,
 		double* work, BlasInt* info) {
 	const BlasInt ione = 1;
@@ -232,6 +316,10 @@ void dchmm(char* side, char* uplo, BlasInt* m, BlasInt* n, double* alpha,
 	dtrmm(side, uplo, &transSecond, &diag, m, n, alpha, a, lda, b, m);
 }
 
+/*
+ * TODO: Replace loops with BLAS calls, especially Givens rotations and
+ * application.
+ */
 void dchex(double* a, BlasInt* n, BlasInt* k, BlasInt* l, double* work,
 		BlasInt* job) {
 //	dchex_(a, &n, &n, &k, &l, xmat, &n, &nz, cvec, svec, &job);

@@ -4,3 +4,5 @@
 -random SVD (either my own simple, or redSVD, or port Tygert's implementation).
 -PROPACK port (either exact port of MATLAB code, or port of Matt O'Toole's simplified version).
 -Look into row/column modifications for Chol.
+-Maybe nystrom for SVD.
+-Change rank-r update code for cholesky to more efficient version by Davis et al.
