@@ -211,7 +211,7 @@ void dchdd(char* uplo, BlasInt* n, double* x, BlasInt* incx, double* a,
 		double* work, BlasInt* info) {
 	const BlasInt ione = 1;
 	dcopy(n, x, incx, work, &ione);
-	dchdd_sub(uplo, n, a, work, info);
+	dchdd_sub_mod(uplo, n, a, work, info);
 }
 
 void dchr_sub(char* uplo, BlasInt* n, double* alpha, double* a, double* work,

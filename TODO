@@ -6,3 +6,5 @@
 -Look into row/column modifications for Chol.
 -Maybe nystrom for SVD.
 -Change rank-r update code for cholesky to more efficient version by Davis et al.
+-Maybe look into Monte-Carlo algorithms?
+-Find way to do rank estimate.
