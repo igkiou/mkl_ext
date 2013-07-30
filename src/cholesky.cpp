@@ -165,9 +165,9 @@ void dchdd_sub_mod(char* uplo, BlasInt* n, double* a, double* work, BlasInt* inf
 			a[(iterI - 1) * (N + 1)] *= ratio;
 			multArg = - aconst;
 			BlasInt K = N - iterI;
-			daxpy(&N, &multArg, &a[(iterI - 1) + iterI * N ], &step, &zvec[iterI], &ione);
+			daxpy(&K, &multArg, &a[(iterI - 1) + iterI * N ], &step, &zvec[iterI], &ione);
 			multArg = - multConst;
-			daxpby(&N, &multArg, &zvec[iterI], &ione, &ratio,
+			daxpby(&K, &multArg, &zvec[iterI], &ione, &ratio,
 				&a[(iterI - 1) + iterI * N ], &step);
 	//		for (BlasInt iterK = iterI + 1; iterK <= N; ++iterK) {
 	//			zvec[iterK - 1] -= aconst * a[(iterI - 1) + (iterK - 1) * N];
@@ -194,9 +194,9 @@ void dchdd_sub_mod(char* uplo, BlasInt* n, double* a, double* work, BlasInt* inf
 			a[(iterI - 1) * (N + 1)] *= ratio;
 			multArg = - aconst;
 			BlasInt K = N - iterI;
-			daxpy(&N, &multArg, &a[iterI + (iterI - 1) * N ], &step, &zvec[iterI], &ione);
+			daxpy(&K, &multArg, &a[iterI + (iterI - 1) * N ], &step, &zvec[iterI], &ione);
 			multArg = - multConst;
-			daxpby(&N, &multArg, &zvec[iterI], &ione, &ratio,
+			daxpby(&K, &multArg, &zvec[iterI], &ione, &ratio,
 				&a[iterI + (iterI - 1) * N ], &step);
 	//		for (BlasInt iterK = iterI + 1; iterK <= N; ++iterK) {
 	//			zvec[iterK - 1] -= aconst * a[(iterI - 1) * N + (iterK - 1)];
