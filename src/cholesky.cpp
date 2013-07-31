@@ -14,51 +14,35 @@
 
 void dchud_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
 	const BlasInt N = *n;
-	double* wvec = work;
-	double* cvec = &work[N];
-	double* svec = &work[2 * N];
 	const BlasInt ione = 1;
 	const BlasInt step = (*uplo == 'L') ? 1 : N;
+
+	double cosine;
+	double sine;
 	BlasInt size = 0;
-	double* tbuff = NULL;
+	double* data = NULL;
+
 	*info = 0;
-	for (BlasInt iter = 0; iter < N - 1; ++iter) {
-		tbuff = &a[iter * N + iter];
-		if ((*tbuff == 0) && (wvec[iter] == 0)) {
+	for (BlasInt iter = 0; iter <= N - 1; ++iter) {
+		data = &a[iter * N + iter];
+		if ((*data == 0) && (work[iter] == 0)) {
 			*info = 1;
 			break;
 		}
-		drotg(tbuff, &wvec[iter], &cvec[iter], &svec[iter]);
+		drotg(data, &work[iter], &cosine, &sine);
 		/*
 		 * TODO: Change these to EPS equalities.
 		 */
-		if (*tbuff < 0) {
-			(*tbuff) = - (*tbuff);
-			cvec[iter] = - cvec[iter];
-			svec[iter] = - svec[iter];
-		} else if (*tbuff == 0) {
+		if (*data < 0) {
+			(*data) = - (*data);
+			cosine = - cosine;
+			sine = - sine;
+		} else if (*data == 0) {
 			*info = 1;
 			break;
 		}
 		size = N - 1 - iter;
-		if (size > 0) {
-			drot(&size, &tbuff[step], &step, &wvec[iter + 1], &ione,
-				&cvec[iter], &svec[iter]);
-		}
-	}
-
-	tbuff = &a[(N - 1) * (N + 1)];
-	if ((*info == 0) && ((*tbuff != 0) || (wvec[N - 1] != 0.0))) {
-		drotg(tbuff, &wvec[N - 1], &cvec[N - 1], &svec[N - 1]);
-		if (*tbuff < 0) {
-			(*tbuff) = - (*tbuff);
-			cvec[N - 1] = - cvec[N - 1];
-			svec[N - 1] = - svec[N - 1];
-		} else if (*tbuff == 0.0) {
-			*info = 1;
-		}
-	} else {
-		*info = 1;
+		drot(&size, &data[step], &step, &work[iter + 1], &ione, &cosine, &sine);
 	}
 }
 
@@ -72,86 +56,70 @@ void dchud(char* uplo, BlasInt* n, double* x, BlasInt* incx, double* a,
 void dchdd_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
 	const BlasInt N = *n;
 	const BlasInt ione = 1;
+	const BlasInt step = (*uplo == 'L') ? 1 : N;
 
-	double* wvec = work;
-	double* cvec = &work[N];
-	double* svec = &work[2 * N];
-
+#if defined(USE_CHOLESKY_LINPACK)
 	const char trans = (*uplo == 'L') ? 'N' : 'T';
 	const char diag = 'N';
-	dtrsv(uplo, &trans, &diag, n, a, n, wvec, &ione);
+	dtrsv(uplo, &trans, &diag, n, a, n, work, &ione);
 
 	*info = 0;
-	double qs = dnrm2(n, wvec, &ione);
+	double qs = dnrm2(n, work, &ione);
 	qs = 1.0 - qs * qs;
-	if (qs <= 0.0) {
+	if (qs <= 0) {
 		*info = 1;
 	} else {
-		qs = sqrt(qs);
-		for (BlasInt iter = N - 1; iter >= 0; --iter) {
-			drotg(&qs, &wvec[iter], &cvec[iter], &svec[iter]);
-			if (qs <= 0.0) {
-				qs = -qs;
-				cvec[iter] = -cvec[iter];
-				svec[iter] = -svec[iter];
-			}
-		}
-		const BlasInt step = (*uplo == 'L') ? 1 : N;
 		BlasInt size = 0;
-		double* tbuff = NULL;
-		memset((void*) wvec, 0, N * sizeof(wvec));
+		double cosine;
+		double sine;
+		double* data = NULL;
+
+		qs = sqrt(qs);
+		memset((void*) work, 0, N * sizeof(work));
 		for (BlasInt iter = N - 1; iter >= 0; --iter) {
-			tbuff = &a[iter * (N + 1)];
-			/*
-			 * TODO: Change these to EPS equalities.
-			 */
-			if (*tbuff <= 0.0) {
+			drotg(&qs, &work[iter], &cosine, &sine);
+			if (qs <= 0) {
+				qs = -qs;
+				cosine = -cosine;
+				sine = -sine;
+			}
+			data = &a[iter * (N + 1)];
+			if (*data <= 0) {
 				*info = 1;
 				break;
 			}
 			size = N - iter;
-			drot(&size, &wvec[iter], &ione, tbuff, &step, &cvec[iter],
-				&svec[iter]);
-			if (*tbuff < 0.0) {
+			drot(&size, &work[iter], &ione, data, &step, &cosine, &sine);
+			if (*data < 0) {
 				qs = -1.0;
-				dscal(&size, &qs, tbuff, &step);
-			} else if (*tbuff == 0.0) {
+				dscal(&size, &qs, data, &step);
+			/*
+			 * TODO: Change these to EPS equalities.
+			 */
+			} else if (*data == 0) {
 				*info = 1;
 				break;
 			}
 		}
 	}
-}
-
-/*
- * TODO: Assumes that L is upper triangular.
- */
-void dchdd_sub_mod(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
-	const BlasInt N = *n;
-	const BlasInt ione = 1;
-
-	double* zvec = work;
-//	double* cvec = &work[N];
-//	double* svec = &work[2 * N];
-
-	const BlasInt step = (*uplo == 'L') ? 1 : N;
-
-	double alpha = 1;
-	double alphaPrev;
-	double beta = 1;
-	double betaPrev;
-	double aconst;
-	double ratio;
-	double multConst;
-	double multArg;
+#elif defined(USE_CHOLESKY_SIMD)
+	double alpha = 1.0;
+	double alphaPrev = alpha;
+	double beta = 1.0;
+	double betaPrev = beta;
+	double ratio = 0;
+	double invProduct = 0;
+	double params[5];
+	params[0] = -1.0;
+	params[1] = 1.0;
 
 	*info = 0;
 	if (*uplo == 'U') {
 		for (BlasInt iterI = 1; iterI <= N; ++iterI) {
 			alphaPrev = alpha;
 			betaPrev = beta;
-			aconst = zvec[iterI - 1] / a[(iterI - 1) * (N + 1)];
-			alpha = alphaPrev - aconst * aconst;
+			params[2] = - work[iterI - 1] / a[(iterI - 1) * (N + 1)];
+			alpha = alphaPrev - params[2] * params[2];
 			/*
 			 * TODO: Change this to eps inequality.
 			 */
@@ -161,26 +129,19 @@ void dchdd_sub_mod(char* uplo, BlasInt* n, double* a, double* work, BlasInt* inf
 			}
 			beta = sqrt(alpha);
 			ratio = beta / betaPrev;
-			multConst = aconst / betaPrev / beta;
+			invProduct = 1 / beta / betaPrev;
+			params[3] = params[2] * invProduct;
+			params[4] = alphaPrev * invProduct;
 			a[(iterI - 1) * (N + 1)] *= ratio;
-			multArg = - aconst;
 			BlasInt K = N - iterI;
-			daxpy(&K, &multArg, &a[(iterI - 1) + iterI * N ], &step, &zvec[iterI], &ione);
-			multArg = - multConst;
-			daxpby(&K, &multArg, &zvec[iterI], &ione, &ratio,
-				&a[(iterI - 1) + iterI * N ], &step);
-	//		for (BlasInt iterK = iterI + 1; iterK <= N; ++iterK) {
-	//			zvec[iterK - 1] -= aconst * a[(iterI - 1) + (iterK - 1) * N];
-	//			a[(iterI - 1) + (iterK - 1) * N] *= ratio;
-	//			a[(iterI - 1) + (iterK - 1) * N] -= multConst * zvec[iterK - 1];
-	//		}
+			drotm(&K, &work[iterI], &ione, &a[(iterI - 1) + iterI * N ], &step, params);
 		}
 	} else {
 		for (BlasInt iterI = 1; iterI <= N; ++iterI) {
 			alphaPrev = alpha;
 			betaPrev = beta;
-			aconst = zvec[iterI - 1] / a[(iterI - 1) * (N + 1)];
-			alpha = alphaPrev - aconst * aconst;
+			params[2] = - work[iterI - 1] / a[(iterI - 1) * (N + 1)];
+			alpha = alphaPrev - params[2] * params[2];
 			/*
 			 * TODO: Change this to eps inequality.
 			 */
@@ -190,28 +151,22 @@ void dchdd_sub_mod(char* uplo, BlasInt* n, double* a, double* work, BlasInt* inf
 			}
 			beta = sqrt(alpha);
 			ratio = beta / betaPrev;
-			multConst = aconst / betaPrev / beta;
+			invProduct = 1 / beta / betaPrev;
+			params[3] = params[2] * invProduct;
+			params[4] = alphaPrev * invProduct;
 			a[(iterI - 1) * (N + 1)] *= ratio;
-			multArg = - aconst;
 			BlasInt K = N - iterI;
-			daxpy(&K, &multArg, &a[iterI + (iterI - 1) * N ], &step, &zvec[iterI], &ione);
-			multArg = - multConst;
-			daxpby(&K, &multArg, &zvec[iterI], &ione, &ratio,
-				&a[iterI + (iterI - 1) * N ], &step);
-	//		for (BlasInt iterK = iterI + 1; iterK <= N; ++iterK) {
-	//			zvec[iterK - 1] -= aconst * a[(iterI - 1) * N + (iterK - 1)];
-	//			a[(iterI - 1) * N + (iterK - 1)] *= ratio;
-	//			a[(iterI - 1) * N + (iterK - 1)] -= multConst * zvec[iterK - 1];
-	//		}
+			drotm(&K, &work[iterI], &ione, &a[iterI + (iterI - 1) * N ], &step, params);
 		}
 	}
+#endif
 }
 
 void dchdd(char* uplo, BlasInt* n, double* x, BlasInt* incx, double* a,
 		double* work, BlasInt* info) {
 	const BlasInt ione = 1;
 	dcopy(n, x, incx, work, &ione);
-	dchdd_sub_mod(uplo, n, a, work, info);
+	dchdd_sub(uplo, n, a, work, info);
 }
 
 void dchr_sub(char* uplo, BlasInt* n, double* alpha, double* a, double* work,
@@ -255,12 +210,16 @@ void dchmv(char* uplo, BlasInt* n, double* a, double* x, BlasInt* incx) {
 	dtrmv(uplo, &transSecond, &diag, n, a, n, x, incx);
 }
 
-/*
- * TODO: May make sense to provide option(s) for
- * 1) work being the size of a plus 2; or
- * 2) custom dchud and dchdd working directly on v and work of size 2*n; or
- * 3) only avoid the multiple rescalings in dchr, and otherwise keep the same.
- */
+void dchrk_sub(char* uplo, BlasInt* n, BlasInt* k, double* alpha, double* c,
+			double* work, BlasInt* info) {
+	for (BlasInt iter = 0; iter < *k; ++iter) {
+		dchr_sub(uplo, n, alpha, c, &work[iter * *n], info);
+		if (*info != 0) {
+			break;
+		}
+	}
+}
+
 void dchrk(char* uplo, char* trans, BlasInt* n, BlasInt* k, double* alpha,
 		double* a, double* c, double* work, BlasInt* info) {
 	if (*trans == 'N') {
@@ -336,25 +295,17 @@ void dchex(double* a, BlasInt* n, BlasInt* k, BlasInt* l, double* work,
 
 	if (*job == 1) {
 		dcopy(&L, &a[lm1 * N], &imone, svec, &ione);
-//		for (BlasInt iterI = 1; iterI <= L; ++iterI) {
-//			BlasInt iterII = L - iterI + 1;
-//			svec[iterI - 1] = a[(L - 1) * N + iterII - 1];
-//		}
 
 		for (BlasInt iterJJ = K; iterJJ <= lm1; ++iterJJ) {
 			BlasInt iterJ = lm1 - iterJJ + K;
 			for (BlasInt iterI = 1; iterI <= iterJ; ++iterI) {
 				a[iterJ * N + iterI - 1] = a[(iterJ - 1) * N + iterI - 1];
 			}
-			a[iterJ * N + iterJ] = 0.0;
+			a[iterJ * N + iterJ] = 0;
 		}
 
 		BlasInt size = K - 1;
 		dcopy(&size, &svec[L - K + 1], &imone, &a[(K - 1) * N], &ione);
-//		for (BlasInt iterI = 1; iterI <= K - 1; ++iterI) {
-//			BlasInt iterII = L - iterI + 1;
-//			a[(K - 1) * N + iterI - 1] = svec[iterII - 1];
-//		}
 
 		double t = svec[0];
 		for (BlasInt iterI = 1; iterI <= lmk; ++iterI) {

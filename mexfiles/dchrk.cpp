@@ -67,7 +67,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 
 	BlasInt ione = 1;
-	double *work = (double *) malloc(3 * N * sizeof(double));
+	double *work = (double *) malloc(N * sizeof(double));
 	BlasInt info = 0;
 	BlasInt Nsq = N * N;
 	dcopy(&Nsq, C, &ione, L, &ione);

@@ -13,6 +13,10 @@ extern "C"
 {
 #endif /* __cplusplus */
 
+#if !defined(USE_CHOLESKY_LINPACK) && !defined(USE_CHOLESKY_SIMD)
+#define USE_CHOLESKY_LINPACK
+#endif
+
 #include "blas_header.h"
 
 /*
@@ -37,6 +41,9 @@ void dchr(char* uplo, BlasInt* n, double* alpha, double* x, BlasInt* incx,
 		double* a, double* work, BlasInt* info);
 
 void dchmv(char* uplo, BlasInt* n, double* a, double* x, BlasInt* incx);
+
+void dchrk_sub(char* uplo, BlasInt* n, BlasInt* k, double* alpha, double* c,
+			double* work, BlasInt* info);
 
 void dchrk(char* uplo, char* trans, BlasInt* n, BlasInt* k, double* alpha,
 		double* a, double* c, double* work, BlasInt* info);
