@@ -278,6 +278,8 @@ void dchmm(char* side, char* uplo, BlasInt* m, BlasInt* n, double* alpha,
 /*
  * TODO: Replace loops with BLAS calls, especially Givens rotations and
  * application.
+ * TODO: Eliminate use of cvec and svec. If not possible, use lartv inside
+ * double loop.
  */
 void dchex(double* a, BlasInt* n, BlasInt* k, BlasInt* l, double* work,
 		BlasInt* job) {
@@ -296,8 +298,7 @@ void dchex(double* a, BlasInt* n, BlasInt* k, BlasInt* l, double* work,
 	if (*job == 1) {
 		dcopy(&L, &a[lm1 * N], &imone, svec, &ione);
 
-		for (BlasInt iterJJ = K; iterJJ <= lm1; ++iterJJ) {
-			BlasInt iterJ = lm1 - iterJJ + K;
+		for (BlasInt iterJ = lm1; iterJ >= K; --iterJ) {
 			for (BlasInt iterI = 1; iterI <= iterJ; ++iterI) {
 				a[iterJ * N + iterI - 1] = a[(iterJ - 1) * N + iterI - 1];
 			}
