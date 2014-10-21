@@ -1,5 +1,5 @@
 % load test_dchud
-N = 10000;
+N = 100;
 F = randn(N, N);
 A = F' * F / N;
 x = randn(N, 1);
@@ -29,19 +29,8 @@ tic; [Ltu, info] = dchud(L, 1, x); t2 = toc;
 fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
 norm(At - Ltu' * Ltu, 'fro'), norm(At - Ltu' * Ltu, 'fro') / norm(At, 'fro'), t2, info);
 
-fprintf('Call dchud linpack up:\n'); 
-tic; [Ltu, info] = dchud_linpack(L, 1, x); t2 = toc;
-fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
-norm(At - Ltu' * Ltu, 'fro'), norm(At - Ltu' * Ltu, 'fro') / norm(At, 'fro'), t2, info);
-
 fprintf('Call dchud lo:\n'); 
 Ltran = L';
 tic; [Ltl, info] = dchud(Ltran, 0, x); t2 = toc;
-fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
-norm(At - Ltl * Ltl', 'fro'), norm(At - Ltl * Ltl', 'fro') / norm(At, 'fro'), t2, info);
-
-fprintf('Call dchud linpack lo:\n'); 
-Ltran = L';
-tic; [Ltl, info] = dchud_linpack(Ltran, 0, x); t2 = toc;
 fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
 norm(At - Ltl * Ltl', 'fro'), norm(At - Ltl * Ltl', 'fro') / norm(At, 'fro'), t2, info);

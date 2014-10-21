@@ -103,6 +103,7 @@ void dchdd_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
 		}
 	}
 #elif defined(USE_CHOLESKY_SIMD)
+	BlasInt size = 0;
 	double alpha = 1.0;
 	double alphaPrev = alpha;
 	double beta = 1.0;
@@ -133,8 +134,8 @@ void dchdd_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
 			params[3] = params[2] * invProduct;
 			params[4] = alphaPrev * invProduct;
 			a[(iterI - 1) * (N + 1)] *= ratio;
-			BlasInt K = N - iterI;
-			drotm(&K, &work[iterI], &ione, &a[(iterI - 1) + iterI * N ], &step, params);
+			size = N - iterI;
+			drotm(&size, &work[iterI], &ione, &a[(iterI - 1) + iterI * N ], &step, params);
 		}
 	} else {
 		for (BlasInt iterI = 1; iterI <= N; ++iterI) {
@@ -155,8 +156,8 @@ void dchdd_sub(char* uplo, BlasInt* n, double* a, double* work, BlasInt* info) {
 			params[3] = params[2] * invProduct;
 			params[4] = alphaPrev * invProduct;
 			a[(iterI - 1) * (N + 1)] *= ratio;
-			BlasInt K = N - iterI;
-			drotm(&K, &work[iterI], &ione, &a[iterI + (iterI - 1) * N ], &step, params);
+			size = N - iterI;
+			drotm(&size, &work[iterI], &ione, &a[iterI + (iterI - 1) * N ], &step, params);
 		}
 	}
 #endif
@@ -216,6 +217,43 @@ void dchrk_sub(char* uplo, BlasInt* n, BlasInt* k, double* alpha, double* c,
 		dchr_sub(uplo, n, alpha, c, &work[iter * *n], info);
 		if (*info != 0) {
 			break;
+		}
+	}
+}
+
+void dchrk_sub_mod(char* uplo, BlasInt* n, BlasInt* k, double* alpha, double* c,
+			double* work, BlasInt* info) {
+
+	const BlasInt N = *n;
+	const BlasInt K = *k;
+	const BlasInt ione = 1;
+
+	double* avec;
+	double dvec;
+	double* gammavec;
+//	BlasInt size;
+
+	for (BlasInt iterI = 1; iterI <= K; ++iterI) {
+		avec[iterI] = 1.0;
+	}
+	for (BlasInt iterJ = 1; iterJ <= N; ++iterJ) {
+		for (BlasInt iterI = 1; iterI <= K; ++iterI) {
+			double aBar = avec[iterI]
+			            + *alpha * work[(iterI - 1) * N + iterJ - 1]
+			            * work[(iterI - 1) * N + iterJ - 1];
+			dvec = aBar;
+			gammavec[iterI] = work[(iterI - 1) * N + iterJ - 1];
+			dvec /= avec[iterI];
+			dvec = sqrt(dvec);
+			avec[iterI] = aBar;
+		}
+		c[(iterJ - 1) * N + iterJ - 1] *= dvec;
+		for (BlasInt iterP = iterJ + 1; iterP <= N; ++iterP) {
+			for (BlasInt iterI = 1; iterI <= K; ++iterI) {
+				work[(iterI - 1) * N + iterP - 1] -= work[(iterI - 1) * N + iterJ - 1] * c[(iterJ - 1) * N + iterP - 1];
+				c[(iterJ - 1) * N + iterP - 1] *= dvec;
+				c[(iterJ - 1) * N + iterP - 1] += dvec * *alpha * gammavec[iterI] * work[(iterI - 1) * N + iterP - 1];
+			}
 		}
 	}
 }
