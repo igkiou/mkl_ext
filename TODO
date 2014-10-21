@@ -8,3 +8,6 @@
 -Change rank-r update code for cholesky to more efficient version by Davis et al.
 -Maybe look into Monte-Carlo algorithms?
 -Find way to do rank estimate.
+-Maybe rename into numerical_utils, and expand in scope.
+-Add filtering/convolution wrappers.
+-Add boost to RNG? Problem is boost is C++ and this is meant to be strictly C only.
