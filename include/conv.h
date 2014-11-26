@@ -8,29 +8,12 @@
 #ifndef CONV_H_
 #define CONV_H_
 
-/*
- * mkl_ext//mkl_ext/include/rng_header.h/rng_header.h
- *
- *  Created on: Jun 17, 2013
- *      Author: igkiou
- */
-
-#ifndef RNG_H_
-#define RNG_H_
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 #include "mkl_service.h"
 #include "mkl_vsl.h"
-const MKL_INT kVSLBRNGMethod = VSL_BRNG_SFMT19937;
-typedef MKL_INT RngSeedType;
-typedef int RngErrorType;
-typedef struct RngEngine {
-	VSLStreamStatePtr m_stream;
-} RngEngine;
-#endif
 
 #include "blas_header.h"
 
