@@ -31,15 +31,15 @@ tic; [Ltu, info] = dchdd(L, 1, x); t2 = toc;
 fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
 norm(At - Ltu' * Ltu, 'fro'), norm(At - Ltu' * Ltu, 'fro') / norm(At, 'fro'), t2, info);
 
-fprintf('Call dchdd linpack up:\n'); 
-tic; [Ltu, info] = dchdd_linpack(L, 1, x); t2 = toc;
-fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
-norm(At - Ltu' * Ltu, 'fro'), norm(At - Ltu' * Ltu, 'fro') / norm(At, 'fro'), t2, info);
+%fprintf('Call dchdd linpack up:\n'); 
+%tic; [Ltu, info] = dchdd_linpack(L, 1, x); t2 = toc;
+%fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
+%norm(At - Ltu' * Ltu, 'fro'), norm(At - Ltu' * Ltu, 'fro') / norm(At, 'fro'), t2, info);
 
-fprintf('Call dchdd mod up:\n'); 
-tic; [Ltu, info] = dchdd_mod(L, 1, x); t2 = toc;
-fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
-norm(At - Ltu' * Ltu, 'fro'), norm(At - Ltu' * Ltu, 'fro') / norm(At, 'fro'), t2, info);
+%fprintf('Call dchdd mod up:\n'); 
+%tic; [Ltu, info] = dchdd_mod(L, 1, x); t2 = toc;
+%fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
+%norm(At - Ltu' * Ltu, 'fro'), norm(At - Ltu' * Ltu, 'fro') / norm(At, 'fro'), t2, info);
 
 fprintf('Call dchdd lo:\n'); 
 Ltran = L';
@@ -47,14 +47,14 @@ tic; [Ltl, info] = dchdd(Ltran, 0, x); t2 = toc;
 fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
 norm(At - Ltl * Ltl', 'fro'), norm(At - Ltl * Ltl', 'fro') / norm(At, 'fro'), t2, info);
 
-fprintf('Call dchdd linpack lo:\n'); 
-Ltran = L';
-tic; [Ltl, info] = dchdd_linpack(Ltran, 0, x); t2 = toc;
-fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
-norm(At - Ltl * Ltl', 'fro'), norm(At - Ltl * Ltl', 'fro') / norm(At, 'fro'), t2, info);
+%fprintf('Call dchdd linpack lo:\n'); 
+%Ltran = L';
+%tic; [Ltl, info] = dchdd_linpack(Ltran, 0, x); t2 = toc;
+%fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
+%norm(At - Ltl * Ltl', 'fro'), norm(At - Ltl * Ltl', 'fro') / norm(At, 'fro'), t2, info);
 
-fprintf('Call dchdd mod lo:\n'); 
-Ltran = L';
-tic; [Ltl, info] = dchdd_mod(Ltran, 0, x); t2 = toc;
-fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
-norm(At - Ltl * Ltl', 'fro'), norm(At - Ltl * Ltl', 'fro') / norm(At, 'fro'), t2, info);
+%fprintf('Call dchdd mod lo:\n'); 
+%Ltran = L';
+%tic; [Ltl, info] = dchdd_mod(Ltran, 0, x); t2 = toc;
+%fprintf('error %g,\trelative error %g,\telapsed time %g seconds,\tstatus %d.\n',...
+%norm(At - Ltl * Ltl', 'fro'), norm(At - Ltl * Ltl', 'fro') / norm(At, 'fro'), t2, info);

@@ -1,5 +1,5 @@
 % load test_dchud
-N = 100;
+N = 10000;
 F = randn(N, N);
 A = F' * F / N;
 x = randn(N, 1);
